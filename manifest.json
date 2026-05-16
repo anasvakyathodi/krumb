@@ -3,6 +3,7 @@
   "name": "Krumb",
   "version": "1.0.0",
   "description": "Auto-rejects cookie banners on every site. Open-source. Zero tracking.",
+  "minimum_chrome_version": "111",
   "permissions": ["storage", "activeTab", "contextMenus", "scripting", "alarms", "tabs"],
   "host_permissions": ["<all_urls>"],
   "background": {
@@ -41,8 +42,6 @@
     {
       "resources": [
         "src/content/picker.js",
-        "src/content/picker.css",
-        "src/content/toast.css",
         "src/welcome/welcome.html",
         "src/selectors/bundled-rules.json",
         "src/shared/tokens.css"

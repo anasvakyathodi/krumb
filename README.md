@@ -45,6 +45,8 @@ krumb/
 
 The extension makes one outbound request: a daily fetch of the public selector list from GitHub. No analytics. No telemetry. No error reporting. Local statistics live only on your device.
 
+Full details: [PRIVACY.md](./PRIVACY.md).
+
 ## Re-render the icons
 
 ```bash

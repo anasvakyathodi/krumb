@@ -154,8 +154,61 @@
             'reject','decline','deny','continue without accepting','refuser','tout refuser','ablehnen'];
   }
 
+  // Banner-context keywords. The ancestor chain of a matching button must
+  // contain at least one of these somewhere in its text or attributes, in
+  // any of the supported languages. Anything else is treated as a false
+  // positive (e.g. a "Decline review" button on a GitHub PR page).
+  const BANNER_KEYWORDS_RE = /\b(cookie|cookies|consent|consents|consentement|privacy|privacidad|privacidade|privatsphare|gdpr|ccpa|tracking|trackers?|datenschutz|confidentialite|kuki|кук|쿠키|クッキー|cookie 政策|个人信息|个性化|偏好|prywatnosci|tietosuoja|integritet|biscoito|biscotti|cookie-erklarung|cookieinstellungen|cookie-einstellungen|cookie banner|cookie notice|cookie preferences|consent banner|consent management)\b/i;
+
+  function ancestorIsBannerLike(el) {
+    // Walk up the tree and check for: (a) a fixed/sticky-positioned ancestor
+    // (banners are almost always overlay-positioned), AND (b) banner-keyword
+    // text somewhere in that ancestor's subtree or attributes. If both,
+    // we're confident the button is inside a banner.
+    let node = el;
+    let posAncestor = null;
+    for (let i = 0; i < 12 && node && node !== document.body; i++) {
+      try {
+        const cs = getComputedStyle(node);
+        if (cs.position === 'fixed' || cs.position === 'sticky') {
+          posAncestor = node;
+          break;
+        }
+      } catch {}
+      node = node.parentElement;
+    }
+    if (!posAncestor) return false;
+
+    // Check text content + key attributes of the fixed/sticky ancestor.
+    const text = (posAncestor.textContent || '').slice(0, 4000);
+    if (BANNER_KEYWORDS_RE.test(text)) return true;
+    const attrs = [
+      posAncestor.id, posAncestor.className,
+      posAncestor.getAttribute?.('aria-label'),
+      posAncestor.getAttribute?.('role'),
+      posAncestor.getAttribute?.('data-testid'),
+    ].filter(Boolean).join(' ');
+    if (BANNER_KEYWORDS_RE.test(attrs)) return true;
+
+    // Dialog role is also a strong signal (CMP modals often have role=dialog).
+    const role = posAncestor.getAttribute?.('role');
+    if (role === 'dialog' || role === 'alertdialog') {
+      // Even in a dialog, require some keyword evidence elsewhere on page.
+      const bodySnippet = (document.body?.textContent || '').slice(0, 8000);
+      if (BANNER_KEYWORDS_RE.test(bodySnippet)) return true;
+    }
+    return false;
+  }
+
+  // The heuristic is only safe in the first few seconds after the page
+  // starts loading. After that, the user is interacting with the actual
+  // app and ambient "reject"/"decline" buttons (PR review, calendar
+  // invites, etc.) become the more common kind.
+  const HEURISTIC_WINDOW_MS = 8000;
+
   function runHeuristic(behavior) {
     if (isAuthPage()) return null;
+    if (performance.now() - START > HEURISTIC_WINDOW_MS) return null;
     const candidates = document.querySelectorAll('button, a[role="button"], [role="button"], input[type="button"], input[type="submit"]');
     const prefs = pickBehaviorOrder(behavior);
     let best = null;
@@ -164,6 +217,8 @@
       const label = el.getAttribute('aria-label') || el.textContent || el.value || '';
       const m = matchesReject(label);
       if (!m) continue;
+      // Hard gate: button must live inside a plausible banner container.
+      if (!ancestorIsBannerLike(el)) continue;
       const prefIdx = prefs.indexOf(m.phrase);
       const score = m.confidence + (prefIdx >= 0 ? (prefs.length - prefIdx) * 0.1 : 0);
       if (!best || score > best.score) best = { el, label, phrase: m.phrase, score };

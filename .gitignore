@@ -9,3 +9,4 @@ node_modules/
 .aw_docs/
 .aw_rules/
 .aw_registry/
+.playwright-mcp/

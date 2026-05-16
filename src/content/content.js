@@ -45,13 +45,56 @@
     if (!s) return '';
     return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
   }
+  // Strong reject signals — phrases that imply the user is rejecting
+  // tracking even when the visible label starts with "Accept" / "Allow"
+  // (e.g. "Accept only essential cookies", "Allow strictly necessary",
+  // "Continue without accepting"). These OVERRIDE the poison filter so
+  // the matcher doesn't bail on the leading "Accept ".
+  const STRONG_REJECT_PATTERNS = [
+    /\bonly\s+(essential|necessary|required|functional|technical|strictly[\s-]+necessary|first[\s-]+party)\b/i,
+    /\b(essential|necessary|required|functional|technical|strictly[\s-]+necessary|first[\s-]+party)\s+only\b/i,
+    /\bwithout\s+(accepting|consent|cookies)\b/i,
+    /\bdo\s+not\s+(accept|sell|allow|track|share)\b/i,
+    /\bsans\s+(accepter|consentement)\b/i,
+    /\bohne\s+(zustimmung|einwilligung|akzeptieren)\b/i,
+    /\bnur\s+(notwendige|essenzielle|erforderliche)\b/i,
+    /\bsolo\s+(necesarias?|esenciales?|necessari)\b/i,
+    /\bapenas\s+(necess[áa]rios?|essenciais?)\b/i,
+    /\bsubmit\s+(my\s+)?preferences\b/i,
+    /\bstrictly[\s-]+necessary\b/i,
+  ];
+
   function matchesReject(label) {
     const n = normalise(label);
-    if (!n || n.length > 64) return null;
-    for (const p of POISON_PHRASES) if (n === p || n.startsWith(p + ' ') && !n.includes('without ' + p) && !n.includes('sans ' + p)) return null;
+    if (!n || n.length > 80) return null;
+
+    // 1) Strong-reject override. "Accept only essential cookies" lands here
+    // before the poison filter has a chance to bail.
+    for (const re of STRONG_REJECT_PATTERNS) {
+      if (re.test(n)) return { phrase: 'only-essential', confidence: 1 };
+    }
+
+    // 2) Poison filter — kill bare "Accept" / "Allow" / "Agree" labels.
+    for (const p of POISON_PHRASES) {
+      if (n === p) return null;
+      if (n.startsWith(p + ' ') && !n.includes('without ' + p) && !n.includes('sans ' + p)) return null;
+    }
+
+    // 3) Standard phrase match (exact, start, end, or whole-word inside).
     for (const phrase of REJECT_PHRASES) {
       if (n === phrase) return { phrase, confidence: 1 };
       if (n.startsWith(phrase + ' ') || n.endsWith(' ' + phrase)) return { phrase, confidence: 0.85 };
+    }
+    // 4) Whole-word inside short labels only — short labels are characteristic
+    // of cookie-banner CTAs ("Manage cookies and reject all"); long labels
+    // are characteristic of app UI ("Decline meeting invitation from …").
+    // The banner-container gate is still the load-bearing safety.
+    if (n.length <= 50) {
+      for (const phrase of REJECT_PHRASES) {
+        const esc = phrase.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const re = new RegExp('(^|\\W)' + esc + '($|\\W)');
+        if (re.test(n)) return { phrase, confidence: 0.7 };
+      }
     }
     return null;
   }

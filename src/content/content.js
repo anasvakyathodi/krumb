@@ -206,6 +206,36 @@
   // invites, etc.) become the more common kind.
   const HEURISTIC_WINDOW_MS = 8000;
 
+  // Last-resort heuristic for "single-action" cookie banners (e.g. Samsung,
+  // many APAC sites) that only offer "Accept" + a close × icon. We look for
+  // a Close/Dismiss control inside a fixed/sticky container whose own text
+  // mentions cookies/consent/privacy. If both conditions hold, pressing
+  // Close is treated as the user's intent. Same time and visibility gates
+  // as the main heuristic; same auth-page guard.
+  function runCloseHeuristic() {
+    if (isAuthPage()) return null;
+    if (performance.now() - START > HEURISTIC_WINDOW_MS) return null;
+    const CLOSE_RE = /\b(close|dismiss|cerrar|fermer|schliessen|schließen|chiudi|fechar|sluit|zamknij|cerrar|закрыть|kapat|閉じる|关闭|關閉|닫기)\b/i;
+    const candidates = document.querySelectorAll('button, a[role="button"], [role="button"], [aria-label]');
+    for (const el of candidates) {
+      if (!elementVisible(el)) continue;
+      const aria = el.getAttribute('aria-label') || '';
+      const cls  = (el.className && typeof el.className === 'string') ? el.className : '';
+      const txt  = (el.textContent || '').trim();
+      // Must look like a close button by aria, class, or visible label.
+      const isClose =
+        CLOSE_RE.test(aria) ||
+        CLOSE_RE.test(cls) ||
+        (txt && txt.length <= 10 && CLOSE_RE.test(txt)) ||
+        // single × / X character is a strong close-button signal
+        txt === '×' || txt === 'X' || txt === '✕' || txt === '✖';
+      if (!isClose) continue;
+      if (!ancestorIsBannerLike(el)) continue;
+      return { el };
+    }
+    return null;
+  }
+
   function runHeuristic(behavior) {
     if (isAuthPage()) return null;
     if (performance.now() - START > HEURISTIC_WINDOW_MS) return null;
@@ -280,7 +310,7 @@
       }
     }
 
-    // 2. Heuristic fallback.
+    // 2. Heuristic fallback (reject-word match inside banner containers).
     if (settings.heuristic !== false) {
       const found = runHeuristic(settings.behavior || 'site');
       if (found) {
@@ -289,6 +319,20 @@
           didReport = true;
           const latency = performance.now() - START;
           postStatus({ kind: 'rejected', selector: '(heuristic)', source: 'heuristic', latency, phrase: found.phrase });
+          return;
+        }
+      }
+
+      // 3. Last-resort: single-action banners (only Accept + Close × icon).
+      // If we can find a Close/Dismiss button inside a banner-keyword
+      // container, pressing it is the user's intent ("just go away").
+      const close = runCloseHeuristic();
+      if (close) {
+        bannerSeen = true;
+        if (safeClick(close.el)) {
+          didReport = true;
+          const latency = performance.now() - START;
+          postStatus({ kind: 'rejected', selector: '(heuristic-close)', source: 'heuristic', latency });
           return;
         }
       }

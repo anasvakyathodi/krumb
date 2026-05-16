@@ -44,6 +44,13 @@
     { "domain": "*.zeit.de",           "selectors": ["button[data-tracking-action='Reject all']", "button[id*='reject']"] },
     { "domain": "*.spiegel.de",        "selectors": ["button[title='Nur notwendige Cookies'], button[data-component='ConsentReject']"] },
 
+    { "comment": "Samsung — single-action banner; close button is the dismiss", "domain": "*.samsung.com", "selectors": [
+      ".cookie-bar__main-close",
+      ".cookie-bar__close",
+      ".cookie-bar button[class*='close']",
+      "[class*='cookie-bar'] button[class*='close']"
+    ]},
+
     { "comment": "OneTrust default — covers thousands of sites" , "domain": "*", "selectors": ["#onetrust-reject-all-handler"] },
     { "comment": "Cookiebot default",   "domain": "*", "selectors": ["#CybotCookiebotDialogBodyButtonDecline", "button#CybotCookiebotDialogBodyLevelButtonCustomize + button"] },
     { "comment": "Didomi default",      "domain": "*", "selectors": ["#didomi-notice-disagree-button", "button.didomi-button-reject", "button.didomi-components-button--color-reject"] },

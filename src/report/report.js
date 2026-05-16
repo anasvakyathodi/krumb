@@ -122,7 +122,14 @@ export function renderReport({ root, site, onCancel, prefill = null }) {
         '— filed via Krumb v1.0.0',
       ].join('\n');
       const url = `${ISSUE_URL}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&labels=${encodeURIComponent('selector,from-extension')}`;
-      window.open(url, '_blank');
+      // Open in a real Chrome tab — window.open from a popup is often
+      // suppressed because the popup loses focus the moment we click,
+      // dismissing the open call before the tab can be created.
+      try {
+        await chrome.tabs.create({ url });
+      } catch {
+        window.open(url, '_blank'); // last-ditch fallback for non-extension contexts
+      }
       // Show a brief "submitted" state then close.
       renderSubmitted({ root, onCancel });
     }

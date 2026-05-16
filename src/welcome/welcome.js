@@ -20,11 +20,20 @@ document.getElementById('open-settings').addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
   }
 });
+function openTab(url) {
+  try {
+    if (typeof chrome !== 'undefined' && chrome.tabs?.create) {
+      chrome.tabs.create({ url });
+      return;
+    }
+  } catch {}
+  window.open(url, '_blank');
+}
 document.getElementById('open-github').addEventListener('click', () => {
-  window.open('https://github.com/anasvakyathodi/krumb', '_blank');
+  openTab('https://github.com/anasvakyathodi/krumb');
 });
 document.getElementById('try-sample').addEventListener('click', () => {
-  window.open('https://www.nytimes.com', '_blank');
+  openTab('https://www.nytimes.com');
 });
 
 // Local week counter (best-effort; static fallback if storage is unavailable).

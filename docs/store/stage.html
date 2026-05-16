@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Krumb · store-asset stage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../../src/shared/tokens.css">
+<link rel="stylesheet" href="../../src/shared/ui.css">
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font-ui); height: 100%; width: 100%; }
+  .stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
+  .glow { position: absolute; top: -260px; right: -180px; width: 820px; height: 820px;
+          background: radial-gradient(closest-side, var(--accent-glow), transparent 70%);
+          filter: blur(20px); opacity: 0.6; pointer-events: none; }
+  .grid { position: absolute; inset: 0; pointer-events: none;
+          background-image:
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+          background-size: 28px 28px;
+          -webkit-mask-image: radial-gradient(closest-side, black 30%, transparent 80%);
+                  mask-image: radial-gradient(closest-side, black 30%, transparent 80%);
+          opacity: 0.5; }
+
+  /* ───────────────────── Browser frame for the hero ───────────────────── */
+  .browser { position: relative; border-radius: 14px; overflow: hidden;
+             background: var(--bg-elev); border: 1px solid var(--border-strong);
+             box-shadow: var(--shadow-pop); }
+  .browser__bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+                  background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .browser__dots { display: flex; gap: 6px; }
+  .browser__dots span { width: 11px; height: 11px; border-radius: 50%; background: var(--surface-3); }
+  .browser__dots span:nth-child(1) { background: oklch(0.68 0.18 28); }
+  .browser__dots span:nth-child(2) { background: oklch(0.82 0.12 80); }
+  .browser__dots span:nth-child(3) { background: oklch(0.74 0.16 145); }
+  .browser__addr { flex: 1; height: 22px; border-radius: 6px; background: var(--bg);
+                   font-family: var(--font-mono); font-size: 11px;
+                   color: var(--text-dim); display: flex; align-items: center; padding: 0 10px; gap: 6px; }
+  .browser__lock { width: 9px; height: 9px; border: 1.4px solid var(--text-dim); border-radius: 2px; position: relative; }
+  .browser__lock::after { content: ''; position: absolute; left: 2px; top: -3px; right: 2px; height: 3px; border: 1.4px solid var(--text-dim); border-bottom: 0; border-top-left-radius: 4px; border-top-right-radius: 4px; }
+  .browser__icon { width: 14px; height: 14px; border-radius: 3px; background: var(--accent); }
+  .browser__body { background: #fefefa; color: #16181c; height: 540px; position: relative; overflow: hidden; }
+
+  /* Fake newspaper inside the browser body */
+  .news { padding: 28px 36px; font-family: 'Source Serif 4', Georgia, serif; }
+  .news__brand { display: flex; align-items: center; justify-content: space-between; }
+  .news__title { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+  .news__nav { display: flex; gap: 16px; font-size: 12px; color: #555; font-family: 'Inter', sans-serif; }
+  .news__head { margin-top: 26px; font-size: 28px; font-weight: 700; line-height: 1.2; max-width: 540px; }
+  .news__rule { margin-top: 14px; height: 4px; width: 80px; background: #000; }
+  .news__body { margin-top: 16px; font-size: 13px; line-height: 1.65; color: #333; max-width: 580px; }
+  .news__pho { margin-top: 22px; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; }
+  .news__pho > div { height: 90px; background: linear-gradient(135deg, #d9d9d3, #b9b9b1); border-radius: 4px; }
+  .news__pho > div:nth-child(2) { background: linear-gradient(135deg, #e8c9a0, #c9a070); }
+  .news__pho > div:nth-child(3) { background: linear-gradient(135deg, #b3d4c2, #6fa088); }
+
+  /* Floating popup */
+  .popup-host { position: absolute; right: 36px; top: 60px; transform: scale(1); transform-origin: top right;
+                box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06); border-radius: 14px; }
+
+  /* ───────────────────── Marquee / tile ───────────────────── */
+  .marquee, .tile { position: relative; width: 100%; height: 100%; padding: 56px 80px;
+                    display: grid; grid-template-columns: 1fr auto; gap: 48px; align-items: center; }
+  .tile { padding: 28px 32px; grid-template-columns: 1fr; gap: 14px; }
+  .marquee__copy h1, .tile__copy h1 { font-size: 64px; font-weight: 600; letter-spacing: -0.035em; line-height: 1; margin: 0; }
+  .tile__copy h1 { font-size: 32px; }
+  .marquee__copy .italic, .tile__copy .italic { color: var(--accent-bright); font-style: italic; font-weight: 500; }
+  .marquee__copy p, .tile__copy p { margin-top: 14px; font-size: 17px; color: var(--text-dim); max-width: 460px; line-height: 1.5; }
+  .tile__copy p { font-size: 12px; margin-top: 6px; max-width: 260px; line-height: 1.4; }
+  .marquee__badge { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 18px; }
+  .marquee__badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .tile__badge { font-family: var(--font-mono); font-size: 10px; color: var(--accent-bright); letter-spacing: 0.16em; text-transform: uppercase; }
+  .marquee__shot { transform: scale(0.95); transform-origin: center right; }
+  .tile__shot { position: absolute; right: -20px; bottom: -10px; transform: scale(0.62); transform-origin: bottom right; opacity: 0.9; }
+
+  /* ───────────────────── Before/After split ───────────────────── */
+  .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 36px 48px; align-items: stretch; height: 100%; }
+  .ba__panel { position: relative; border-radius: 12px; overflow: hidden; background: #fefefa; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+  .ba__panel--clean { box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 0 1px oklch(0.80 0.16 145 / 0.4); }
+  .ba__label { position: absolute; top: 14px; left: 14px; z-index: 5;
+               padding: 4px 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+               border-radius: 999px; background: rgba(11,12,14,0.85); color: var(--text); }
+  .ba__label--ok { background: var(--accent); color: var(--accent-ink); }
+  .ba__banner { position: absolute; left: 16px; right: 16px; bottom: 16px; background: #fff;
+                border: 1px solid #ddd; border-radius: 6px; padding: 14px 16px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: flex; gap: 12px; align-items: center; font-size: 11px; color: #222; font-family: 'Inter', sans-serif; }
+  .ba__banner-cta { display: flex; gap: 6px; flex-shrink: 0; }
+  .ba__banner-cta button { padding: 6px 12px; font-size: 11px; font-family: 'Inter', sans-serif; border-radius: 4px; }
+  .ba__banner-cta .reject { background: #fff; border: 1px solid #aaa; color: #333; }
+  .ba__banner-cta .accept { background: #1a1a1a; color: #fff; border: 0; font-weight: 600; }
+
+  /* Center the popup component inside browser-stage */
+  .popup-only { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+
+<!-- Hidden popup states pulled in via iframe to reuse the real popup chrome -->
+<script type="module">
+import { I, iconSvg, krumbWordmarkHtml, krumbMarkSvg } from '../../src/shared/icons.js';
+
+const params = new URLSearchParams(location.search);
+const shot = params.get('shot') || 'hero';
+const stage = document.getElementById('stage');
+
+// ─── Helpers ─────────────────────────────────────────────────────────
+function popupFrame(state) {
+  // Inline-render the popup HTML directly (avoid iframe race conditions).
+  // Mirrors src/popup/popup.js's renderState logic for the rejected variant.
+  return `
+    <div class="popup-shell" style="
+      width: 340px; background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: 14px; overflow: hidden; font-family: var(--font-ui); color: var(--text);
+    ">
+      ${renderPopupBody(state)}
+    </div>
+  `;
+}
+function renderPopupBody(state) {
+  // (Truncated copy of popup.js renderers — only the bits we need for stills.)
+  return `
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px;
+                border-bottom:1px solid var(--border); background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);">
+      ${krumbWordmarkHtml({ size: 14 })}
+      ${state === 'paused'
+        ? `<span class="k-pill k-pill--mute">${iconSvg(I.pause, { size: 10 })} paused</span>`
+        : `<span class="k-pill k-pill--accent"><span class="k-pill__dot"></span>active</span>`}
+    </div>
+    ${popupCard(state)}
+    ${popupToggleRow('Krumb is active', state === 'paused' ? 'globally disabled' : 'globally enabled', state !== 'paused')}
+    <div style="height:1px; background: var(--border);"></div>
+    ${popupToggleRow('Run on this site', state === 'whitelisted' ? 'banking.app' : state === 'paused' ? '—' : 'nytimes.com',
+                     state !== 'whitelisted' && state !== 'paused', state === 'paused')}
+    <div style="display:flex; align-items:baseline; gap:8px; padding:11px 16px;
+                background: var(--bg-elev); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+      <span style="font-size:18px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:-0.02em;">1,284</span>
+      <span style="font-size:11.5px; color:var(--text-dim); flex:1;">banners rejected this week</span>
+      <span style="font-size:10px; color:var(--text-faint); font-family:var(--font-mono);">local only</span>
+    </div>
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px;
+                border-top:1px solid var(--border); background: var(--bg-elev); font-size:11.5px; color:var(--text-dim);">
+      <div style="display:flex; gap:14px;"><span>Settings</span><span>Report</span><span>Help</span></div>
+      <div style="font-size:10.5px; color:var(--text-faint); font-family:var(--font-mono);">v1.0.0</div>
+    </div>
+  `;
+}
+function popupCard(state) {
+  const cards = {
+    rejected: { tone: 'accent', icon: I.check, title: 'Banner auto-rejected',
+                sub: 'on <span style="font-family:var(--font-mono); color:var(--text);">nytimes.com</span> · 142ms' },
+    'no-banner': { tone: 'mute', icon: I.shield, title: 'No banner detected',
+                   sub: 'nothing to dismiss on <span style="font-family:var(--font-mono); color:var(--text);">en.wikipedia.org</span>' },
+    failed: { tone: 'warn', icon: I.question, title: "Couldn't find the reject button",
+              sub: 'banner detected on <span style="font-family:var(--font-mono); color:var(--text);">forum.lemonde.fr</span> but we don\'t have a rule for it yet.' },
+    whitelisted: { tone: 'mute', icon: I.pause, title: 'Krumb is off for this site',
+                   sub: 'you\'ve turned us off on <span style="font-family:var(--font-mono); color:var(--text);">banking.app</span>. cookie banners will appear normally.' },
+    paused: { tone: 'mute', icon: I.pause, title: 'Krumb is paused',
+              sub: 'cookie banners will appear normally on every site. nothing is being auto-rejected.' },
+  };
+  const c = cards[state] || cards.rejected;
+  const toneBg = c.tone === 'accent' ? 'var(--accent-glow)' : c.tone === 'warn' ? 'var(--warn-glow)' : 'var(--surface-2)';
+  const toneColor = c.tone === 'accent' ? 'var(--accent-bright)' : c.tone === 'warn' ? 'var(--warn)' : 'var(--text-dim)';
+  const toneBorder = c.tone === 'accent' ? 'oklch(0.80 0.16 145 / 0.25)' : c.tone === 'warn' ? 'oklch(0.82 0.12 80 / 0.25)' : 'var(--border-strong)';
+  return `
+    <div style="padding:18px 16px 16px; border-bottom:1px solid var(--border);">
+      <div style="display:flex; gap:12px;">
+        <div style="width:36px; height:36px; border-radius:10px; background:${toneBg}; color:${toneColor};
+                    display:flex; align-items:center; justify-content:center; flex:none; border:1px solid ${toneBorder};">
+          ${iconSvg(c.icon, { size: 18, strokeWidth: 1.8 })}
+        </div>
+        <div style="flex:1; min-width:0; padding-top:1px;">
+          <div style="font-size:13.5px; font-weight:600; color:var(--text); line-height:1.35;">${c.title}</div>
+          <div style="font-size:12px; color:var(--text-dim); margin-top:3px; line-height:1.45;">${c.sub}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function popupToggleRow(label, sub, on, disabled = false) {
+  return `
+    <div style="display:flex; align-items:center; gap:10px; padding:11px 16px; opacity:${disabled ? 0.5 : 1};">
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:12.5px; color:var(--text); font-weight:500;">${label}</div>
+        <div style="font-size:11px; color:var(--text-dim); margin-top:2px; font-family:var(--font-mono);">${sub}</div>
+      </div>
+      <span class="k-toggle k-toggle--sm" aria-checked="${on ? 'true' : 'false'}" style="cursor:default;">
+        <span class="k-toggle__dot"></span>
+      </span>
+    </div>
+  `;
+}
+
+// ─── Compositions ───────────────────────────────────────────────────
+const fakeBanner = `
+  <div class="ba__banner">
+    <div style="flex:1; font-size:11px; color:#222; line-height:1.45;">
+      We use cookies to personalize content and analyse traffic. Your data may be shared with our partners…
+    </div>
+    <div class="ba__banner-cta">
+      <button class="reject">Reject all</button>
+      <button class="accept">Accept all</button>
+    </div>
+  </div>
+`;
+
+const fakeNewsPage = `
+  <div class="browser__bar">
+    <div class="browser__dots"><span></span><span></span><span></span></div>
+    <div class="browser__addr"><span class="browser__lock"></span>nytimes.com/2026/world/headline</div>
+    <div class="browser__icon"></div>
+  </div>
+  <div class="browser__body">
+    <div class="news">
+      <div class="news__brand">
+        <div class="news__title">The Daily Ledger</div>
+        <div class="news__nav"><span>World</span><span>Politics</span><span>Business</span><span>Tech</span><span>Culture</span></div>
+      </div>
+      <div class="news__head">Public transit fares dropped to zero in 12 European cities — what we learned</div>
+      <div class="news__rule"></div>
+      <div class="news__body">A recent study shows that universal free transit measurably lifts ridership without straining municipal budgets when paired with congestion pricing — though the funding mix matters more than the headline number…</div>
+      <div class="news__pho"><div></div><div></div><div></div></div>
+    </div>
+  </div>
+`;
+
+function renderHero() {
+  stage.innerHTML = `
+    <div class="glow"></div>
+    <div class="grid"></div>
+    <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:32px;">
+      <div class="browser" style="width: 920px;">
+        ${fakeNewsPage}
+        <div class="popup-host">${popupFrame('rejected')}</div>
+      </div>
+    </div>
+    <div style="position:absolute; left:48px; bottom:32px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="k-live-dot"></span>
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase;">Banner auto-rejected · 142&nbsp;ms</span>
+      </div>
+      <div style="margin-top:8px; font-size:30px; font-weight:600; letter-spacing:-0.02em;">
+        Quiet enough to be <span style="color:var(--accent-bright); font-style:italic; font-weight:500;">forgotten</span>.
+      </div>
+    </div>
+  `;
+}
+
+function renderWelcome() {
+  stage.innerHTML = `<iframe src="../../src/welcome/welcome.html" style="border:0; width:100%; height:100%; background:var(--bg);"></iframe>`;
+}
+function renderSettings() {
+  stage.innerHTML = `<iframe src="../../src/options/options.html?demo=1" style="border:0; width:100%; height:100%; background:var(--bg);"></iframe>`;
+}
+function renderBeforeAfter() {
+  stage.innerHTML = `
+    <div class="glow"></div>
+    <div class="grid"></div>
+    <div class="ba">
+      <div class="ba__panel">
+        <div class="ba__label">Before · without Krumb</div>
+        ${fakeNewsPage}
+        ${fakeBanner}
+      </div>
+      <div class="ba__panel ba__panel--clean">
+        <div class="ba__label ba__label--ok">After · 142&nbsp;ms later</div>
+        ${fakeNewsPage}
+      </div>
+    </div>
+  `;
+}
+function renderPopupGallery() {
+  // Show 3 popup variants side-by-side
+  const variants = ['rejected', 'failed', 'paused'];
+  stage.innerHTML = `
+    <div class="glow"></div>
+    <div class="grid"></div>
+    <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:32px;">
+      ${variants.map(v => `<div style="filter: drop-shadow(0 24px 60px rgba(0,0,0,0.55));">${popupFrame(v)}</div>`).join('')}
+    </div>
+    <div style="position:absolute; left:48px; bottom:32px; font-size:13px; font-family:var(--font-mono); color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase;">
+      Five popup states. One job: tell you what just happened.
+    </div>
+  `;
+}
+
+function renderMarquee() {
+  stage.innerHTML = `
+    <div class="glow"></div>
+    <div class="grid"></div>
+    <div class="marquee">
+      <div class="marquee__copy">
+        <div class="marquee__badge"><span class="dot"></span> Krumb · v1.0</div>
+        <h1>You'll never see another<br><span class="italic">cookie banner</span>.</h1>
+        <p>An open-source Chrome extension that finds the "Reject all" button before you do and clicks it. ~200 ms per page. Zero tracking. Free forever.</p>
+      </div>
+      <div class="marquee__shot">
+        ${popupFrame('rejected')}
+      </div>
+    </div>
+  `;
+}
+
+function renderTile() {
+  stage.innerHTML = `
+    <div class="glow"></div>
+    <div class="tile">
+      <div class="tile__copy">
+        <div class="tile__badge">KRUMB · v1.0</div>
+        <h1>Reject all,<br>automatically.</h1>
+        <p>Open-source. Zero tracking. Works on every site.</p>
+      </div>
+      <div class="tile__shot">${popupFrame('rejected')}</div>
+    </div>
+  `;
+}
+
+const shots = { hero: renderHero, welcome: renderWelcome, settings: renderSettings,
+                'before-after': renderBeforeAfter, gallery: renderPopupGallery,
+                marquee: renderMarquee, tile: renderTile };
+(shots[shot] || renderHero)();
+</script>
+</body>
+</html>

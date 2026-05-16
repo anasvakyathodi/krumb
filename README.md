@@ -51,6 +51,12 @@ The extension makes one outbound request: a daily fetch of the public selector l
 node scripts/build-icons.mjs
 ```
 
+## Support
+
+Krumb is free and open-source forever — there is no paid tier and there will never be one. If it saves you enough clicks to be worth a coffee, you can tip me at [paypal.me/anasvakyathodi](https://paypal.me/anasvakyathodi). Anything you send goes directly to the maintainer; the extension itself stays 100% free for everyone.
+
+[![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://paypal.me/anasvakyathodi)
+
 ## License
 
 MIT. See LICENSE.

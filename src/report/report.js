@@ -12,7 +12,7 @@ function escapeHtml(s) {
   }[c]));
 }
 
-export function renderReport({ root, site, onCancel }) {
+export function renderReport({ root, site, onCancel, prefill = null }) {
   root.innerHTML = `
     <div class="report-shell">
       <div class="report-header">
@@ -66,6 +66,19 @@ export function renderReport({ root, site, onCancel }) {
       </div>
     </div>
   `;
+
+  // Pre-fill the selector when arriving here from the on-page picker, so
+  // the user lands back where they left off.
+  if (prefill?.selector) {
+    const sel = document.getElementById('report-selector');
+    if (sel) sel.value = prefill.selector;
+  }
+  if (prefill?.label) {
+    const notes = document.getElementById('report-notes');
+    if (notes && !notes.value) {
+      notes.value = `Reject button label on page: "${prefill.label}"`;
+    }
+  }
 
   const close = () => { if (typeof onCancel === 'function') onCancel(); };
 

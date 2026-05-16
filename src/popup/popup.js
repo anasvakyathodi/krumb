@@ -238,10 +238,35 @@ function renderState(state, ctx) {
 }
 
 // ─────────────────────────── Boot ───────────────────────────
+async function consumePickerResult() {
+  try {
+    const raw = await chrome.storage.session.get('picker:last');
+    const data = raw['picker:last'];
+    if (!data) return null;
+    // Drop stale picks (>5 min old).
+    if (Date.now() - (data.at || 0) > 5 * 60 * 1000) {
+      await chrome.storage.session.remove('picker:last');
+      return null;
+    }
+    await chrome.storage.session.remove('picker:last');
+    return data;
+  } catch { return null; }
+}
+
 async function boot() {
   const tab = await getActiveTab();
   const settings = await getSettings();
   const site = domainOf(tab?.url || '');
+
+  // If the user just finished using the on-page selector picker, jump
+  // back into the report dialog with the picked selector pre-filled
+  // instead of reverting to the home state.
+  const pick = await consumePickerResult();
+  if (pick && pick.selector) {
+    renderReport({ root, site, onCancel: boot, prefill: pick });
+    return;
+  }
+
   const status = tab ? await getTabStatus(tab.id) : null;
   const stateDecision = decideState({ settings, tab, status });
   root.innerHTML = renderState(stateDecision, { settings, site, tab });

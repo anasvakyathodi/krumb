@@ -5,3 +5,7 @@ node_modules/
 *.zip
 *.crx
 .claude/
+.aw
+.aw_docs/
+.aw_rules/
+.aw_registry/

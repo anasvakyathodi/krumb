@@ -1,0 +1,76 @@
+/* Krumb — report dialog (loaded inside popup) */
+
+.report-shell {
+  width: 340px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-pop);
+  color: var(--text); font-family: var(--font-ui);
+  display: flex; flex-direction: column;
+}
+.report-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.report-header__title {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 13px; font-weight: 600;
+}
+.report-close { color: var(--text-dim); }
+.report-close:hover { color: var(--text); }
+
+.report-body { padding: 16px 16px 4px; }
+.report-field { margin-bottom: 14px; }
+.report-field__row {
+  display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px;
+}
+.report-field__label {
+  font-size: 11.5px; color: var(--text-dim);
+  font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase;
+}
+.report-field__optional { font-size: 10.5px; color: var(--text-faint); }
+.report-field__hint {
+  margin-top: 6px; font-size: 11px; color: var(--text-faint);
+}
+
+.report-input {
+  width: 100%; background: var(--bg-elev);
+  border: 1px solid var(--border-strong); border-radius: 8px;
+  color: var(--text); font-size: 12.5px; padding: 8px 10px;
+  font-family: var(--font-ui); resize: none; outline: none;
+}
+.report-input.k-mono {
+  font-family: var(--font-mono); font-feature-settings: 'ss01', 'ss02';
+  height: 30px; padding: 0 8px;
+}
+.report-input:focus { border-color: var(--accent); }
+
+.report-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-elev);
+  display: flex; gap: 8px;
+}
+.report-disclaimer {
+  padding: 10px 16px;
+  font-size: 10.5px; color: var(--text-faint); line-height: 1.5;
+  border-top: 1px solid var(--border); background: var(--bg);
+}
+.report-disclaimer em { color: var(--text-dim); font-style: italic; }
+
+.report-submitted {
+  padding: 32px 22px; text-align: center;
+}
+.report-submitted__icon {
+  width: 48px; height: 48px; border-radius: 14px; margin: 0 auto;
+  background: var(--accent-glow); color: var(--accent-bright);
+  border: 1px solid oklch(0.80 0.16 145 / 0.30);
+  display: flex; align-items: center; justify-content: center;
+}
+.report-submitted__title { margin-top: 16px; font-size: 14px; font-weight: 600; }
+.report-submitted__sub {
+  margin-top: 6px; font-size: 12.5px; color: var(--text-dim); line-height: 1.5;
+}

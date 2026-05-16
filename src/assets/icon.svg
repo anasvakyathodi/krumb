@@ -1,0 +1,12 @@
+<svg width="128" height="128" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <mask id="km">
+      <rect width="24" height="24" rx="6" fill="white"/>
+      <circle cx="19"  cy="6"    r="4.2" fill="black"/>
+      <circle cx="6.5" cy="18"   r="1.6" fill="black"/>
+      <circle cx="16"  cy="18.5" r="1.1" fill="black"/>
+    </mask>
+  </defs>
+  <rect width="24" height="24" rx="6" fill="#5dd884" mask="url(#km)"/>
+  <circle cx="10" cy="11" r="1.1" fill="#06120a" opacity="0.6"/>
+</svg>

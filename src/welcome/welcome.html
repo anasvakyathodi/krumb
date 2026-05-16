@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welcome to Krumb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/ui.css">
+<link rel="stylesheet" href="welcome.css">
+</head>
+<body>
+  <div class="welcome-bg-glow"></div>
+  <div class="welcome-bg-grid k-grid-bg"></div>
+
+  <header class="welcome-topbar">
+    <span class="k-wordmark" id="wm-topbar"></span>
+    <div class="welcome-topbar__right">
+      <span class="welcome-topbar__version">
+        <span class="welcome-topbar__dot"></span> v1.0.0 · MIT
+      </span>
+      <span>·</span>
+      <button class="welcome-topbar__settings" id="open-settings">Settings</button>
+    </div>
+  </header>
+
+  <section class="welcome-hero">
+    <div class="welcome-hero__live">
+      <span class="k-live-dot"></span>
+      <span class="welcome-hero__live-text">Krumb is installed and already working.</span>
+    </div>
+    <h1 class="welcome-hero__title">
+      You'll never see another <span class="welcome-hero__accent">cookie&nbsp;banner</span>.
+    </h1>
+    <p class="welcome-hero__body">
+      From now on, when you land on a site that wants to show you a consent banner, Krumb finds the reject button before you do and clicks it for you. Silently. About a fifth of a second per page.
+    </p>
+    <div class="welcome-hero__cta">
+      <button class="k-btn k-btn--primary k-btn--lg" id="try-sample">
+        <span>Try it on a sample site</span>
+        <span id="ic-arrow"></span>
+      </button>
+      <button class="k-btn k-btn--ghost k-btn--lg" id="open-github">
+        <span id="ic-gh"></span>
+        <span>See the source on GitHub</span>
+        <span id="ic-ext"></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="welcome-counter">
+    <div class="welcome-counter__grid">
+      <div class="welcome-counter__cell">
+        <div class="welcome-counter__mono">REJECTED TODAY</div>
+        <div class="welcome-counter__value" id="counter-community">2,847,193</div>
+        <div class="welcome-counter__hint">across all Krumb users · loaded from GitHub Pages, no tracking</div>
+      </div>
+      <div class="welcome-counter__divider"></div>
+      <div class="welcome-counter__cell">
+        <div class="welcome-counter__mono">THIS WEEK, ON THIS DEVICE</div>
+        <div class="welcome-counter__value" id="counter-local">0</div>
+        <div class="welcome-counter__hint">local count · only visible to you</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="welcome-rule"></div>
+
+  <section class="welcome-how">
+    <div class="welcome-how__eyebrow">HOW IT WORKS</div>
+    <div class="welcome-how__head">Three things to know. None of them require your attention again.</div>
+    <div class="welcome-how__grid">
+      <div class="welcome-step">
+        <div class="welcome-step__n">01</div>
+        <div class="welcome-step__head">It runs silently</div>
+        <div class="welcome-step__body">No toast, no popup, no badge. The banner is gone before you'd have noticed it. Quiet is the whole product.</div>
+      </div>
+      <div class="welcome-step">
+        <div class="welcome-step__n">02</div>
+        <div class="welcome-step__head">Look for the mark <span id="ic-mark" style="vertical-align:middle; margin-left:4px;"></span></div>
+        <div class="welcome-step__body">Krumb lives in the Chrome toolbar. Click it to see what happened on the current page, pause it for one site, or open settings.</div>
+      </div>
+      <div class="welcome-step">
+        <div class="welcome-step__n">03</div>
+        <div class="welcome-step__head">Help the next person</div>
+        <div class="welcome-step__body">If a site sneaks past Krumb, click the toolbar and "report it". That opens a pre-filled GitHub issue. The fix lands for everyone on the next daily sync.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="welcome-perm">
+    <div class="welcome-perm__card">
+      <div class="welcome-perm__icon" id="ic-shield"></div>
+      <div>
+        <div class="welcome-perm__title">Yes, Krumb has access to every site you visit.</div>
+        <p class="welcome-perm__body">
+          That permission is non-negotiable for a cookie blocker — banners are on every site, so we have to be there too. But Krumb only ever looks for banner DOM elements and clicks them. It doesn't read page content, doesn't store URLs, doesn't phone home. The selector list is fetched directly from GitHub.
+        </p>
+        <div class="welcome-perm__bullets">
+          <span class="welcome-bullet"><span class="welcome-bullet__ic" id="b1"></span>0 bytes sent to Krumb's servers</span>
+          <span class="welcome-bullet"><span class="welcome-bullet__ic" id="b2"></span>0 analytics SDKs</span>
+          <span class="welcome-bullet"><span class="welcome-bullet__ic" id="b3"></span>100% MIT-licensed</span>
+          <span class="welcome-bullet"><span class="welcome-bullet__ic" id="b4"></span>~38 KB total</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="welcome-footer">
+    <div class="welcome-footer__left">Krumb is free and open-source forever. There is no paid tier.</div>
+    <div class="welcome-footer__links">
+      <span>GitHub</span><span>Selector list</span><span>FAQ</span><span>Privacy</span>
+    </div>
+  </footer>
+
+  <script type="module" src="welcome.js"></script>
+</body>
+</html>

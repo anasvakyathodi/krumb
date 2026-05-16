@@ -4,7 +4,7 @@
 import { I, iconSvg } from '../shared/icons.js';
 import { MSG, send } from '../shared/messaging.js';
 
-const ISSUE_URL = 'https://github.com/krumb/list/issues/new';
+const ISSUE_URL = 'https://github.com/anasvakyathodi/krumb/issues/new';
 
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({

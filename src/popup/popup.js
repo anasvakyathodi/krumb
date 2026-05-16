@@ -311,7 +311,7 @@ function bind({ tab, settings, site }) {
       window.close();
     }
     if (action === 'help') {
-      chrome.tabs.create({ url: 'https://github.com/krumb/list#readme' });
+      chrome.tabs.create({ url: 'https://github.com/anasvakyathodi/krumb#readme' });
       window.close();
     }
     if (action === 'report' || action === 'dismiss-failed') {

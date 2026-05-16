@@ -240,7 +240,7 @@ async function render() {
       content:
         fieldRow({
           label: 'Auto-update from GitHub once a day',
-          hint: `Fetched from <span class="k-mono">github.com/krumb/list</span>. The request goes directly to GitHub — never through us.`,
+          hint: `Fetched from <span class="k-mono">github.com/anasvakyathodi/krumb</span>. The request goes directly to GitHub — never through us.`,
           control: renderToggle('autoUpdateRules', s.autoUpdateRules),
         }) +
         updateRow({
@@ -287,7 +287,7 @@ async function render() {
         <div class="opt-privacy__title">Krumb is fully open-source.</div>
         <div class="opt-privacy__body">No analytics, no telemetry, no error reporting. The selector list is fetched from GitHub directly; we don't see those requests either.</div>
       </div>
-      <a class="k-btn k-btn--outline k-btn--sm" href="https://github.com/krumb" target="_blank" rel="noopener" style="text-decoration:none;">
+      <a class="k-btn k-btn--outline k-btn--sm" href="https://github.com/anasvakyathodi/krumb" target="_blank" rel="noopener" style="text-decoration:none;">
         ${iconSvg(I.github, { size: 14 })}<span>Read the source</span>${iconSvg(I.external, { size: 14 })}
       </a>
     </div>

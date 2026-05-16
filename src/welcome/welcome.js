@@ -21,7 +21,7 @@ document.getElementById('open-settings').addEventListener('click', () => {
   }
 });
 document.getElementById('open-github').addEventListener('click', () => {
-  window.open('https://github.com/krumb/list', '_blank');
+  window.open('https://github.com/anasvakyathodi/krumb', '_blank');
 });
 document.getElementById('try-sample').addEventListener('click', () => {
   window.open('https://www.nytimes.com', '_blank');

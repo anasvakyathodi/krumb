@@ -21,7 +21,7 @@ export const DEFAULTS = Object.freeze({
   rulesCount: 0,
 });
 
-export const RULES_REMOTE_URL = 'https://raw.githubusercontent.com/krumb/list/main/rules.json';
+export const RULES_REMOTE_URL = 'https://raw.githubusercontent.com/anasvakyathodi/krumb/main/src/selectors/bundled-rules.json';
 
 export async function getSettings() {
   const raw = await chrome.storage.local.get(Object.keys(DEFAULTS));

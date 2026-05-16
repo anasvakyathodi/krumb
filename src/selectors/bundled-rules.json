@@ -1,7 +1,7 @@
 {
   "version": "2026.05.16-bundled",
   "updated": "2026-05-16",
-  "notes": "Day-one curated set. Maintained at github.com/krumb/list.",
+  "notes": "Day-one curated set. Maintained at github.com/anasvakyathodi/krumb.",
   "rules": [
     { "domain": "*.nytimes.com",       "selectors": ["button[data-testid='Decline all']", "button[data-testid='cookie-banner-reject']"] },
     { "domain": "amazon.com",          "selectors": ["#sp-cc-rejectall-link", "input[name='reject']"] },

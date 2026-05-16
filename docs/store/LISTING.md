@@ -194,11 +194,11 @@ Located in `docs/store/`:
 | Slot | File | Dimensions |
 |---|---|---|
 | Icon (128×128) | `../../src/assets/icon-default-128.png` | 128 × 128 |
-| Screenshot 1 (hero) | `screenshot-1-hero.png` | 1280 × 800 |
-| Screenshot 2 (before/after) | `screenshot-2-before-after.png` | 1280 × 800 |
+| Screenshot 1 (hero · popup in browser) | `screenshot-1-hero.png` | 1280 × 800 |
+| Screenshot 2 (before / after) | `screenshot-2-before-after.png` | 1280 × 800 |
 | Screenshot 3 (popup states) | `screenshot-3-popup-states.png` | 1280 × 800 |
-| Screenshot 4 (settings) | `screenshot-4-settings.png` | 1280 × 800 |
-| Screenshot 5 (welcome) | `screenshot-5-welcome.png` | 1280 × 800 |
+| Screenshot 4 (welcome page) | `screenshot-4-welcome.png` | 1280 × 800 |
+| Screenshot 5 (settings page) | `screenshot-5-settings.png` | 1280 × 800 |
 | Small promo tile | `promo-tile-440x280.png` | 440 × 280 |
 | Marquee promo tile | `promo-marquee-1400x560.png` | 1400 × 560 |
 

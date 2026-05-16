@@ -1,0 +1,136 @@
+/* Krumb — design tokens */
+:root {
+  /* Dark mode (primary) */
+  --bg: #0b0c0e;
+  --bg-elev: #111317;
+  --surface: #15171b;
+  --surface-2: #1c1f24;
+  --surface-3: #232730;
+
+  --border: rgba(255,255,255,0.06);
+  --border-strong: rgba(255,255,255,0.10);
+  --border-bright: rgba(255,255,255,0.18);
+
+  --text: #ededec;
+  --text-dim: #8e9298;
+  --text-faint: #5b6068;
+
+  /* Accent — soft signal green, single source of truth */
+  --accent: oklch(0.80 0.16 145);
+  --accent-bright: oklch(0.86 0.18 145);
+  --accent-dim: oklch(0.62 0.14 145);
+  --accent-ink: #06120a;
+  --accent-glow: oklch(0.80 0.16 145 / 0.12);
+
+  --warn: oklch(0.82 0.12 80);
+  --warn-glow: oklch(0.82 0.12 80 / 0.12);
+
+  --danger: oklch(0.68 0.18 28);
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.35);
+  --shadow-pop: 0 18px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06);
+
+  --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+}
+
+/* Light tokens (scoped) */
+.krumb-light {
+  --bg: #f5f5f3;
+  --bg-elev: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f1f1ee;
+  --surface-3: #e7e7e2;
+  --border: rgba(0,0,0,0.06);
+  --border-strong: rgba(0,0,0,0.10);
+  --border-bright: rgba(0,0,0,0.20);
+  --text: #16181c;
+  --text-dim: #5b6068;
+  --text-faint: #8e9298;
+  --accent: oklch(0.55 0.15 145);
+  --accent-bright: oklch(0.50 0.16 145);
+  --accent-dim: oklch(0.65 0.14 145);
+  --accent-ink: #ffffff;
+  --accent-glow: oklch(0.55 0.15 145 / 0.10);
+}
+
+/* Reset-ish */
+* { box-sizing: border-box; }
+button { font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; }
+input, textarea { font: inherit; color: inherit; }
+
+/* Patterns */
+.k-grid-bg {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.k-noise {
+  background-image: radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+/* Krumb surface — used by every panel */
+.k-surface {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+/* Inline mono chip */
+.k-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: 'ss01', 'ss02';
+  font-size: 0.86em;
+  letter-spacing: -0.01em;
+}
+
+.k-kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+}
+
+/* Focus ring */
+*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* Subtle scrollbars inside panels */
+.k-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.k-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+.k-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* Soft pulse for the "live" rejecting state */
+@keyframes k-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+.k-live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: k-pulse 1.6s ease-in-out infinite;
+}
+
+/* For the in-context "banner flash" demo */
+@keyframes k-banner-flash {
+  0%   { opacity: 0; transform: translateY(20px); }
+  10%  { opacity: 1; transform: translateY(0); }
+  35%  { opacity: 1; transform: translateY(0); }
+  45%  { opacity: 0; transform: translateY(20px); pointer-events: none; }
+  100% { opacity: 0; transform: translateY(20px); pointer-events: none; }
+}

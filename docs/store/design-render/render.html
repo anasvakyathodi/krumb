@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Krumb · design renderer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #0b0c0e; color: #ededec; font-family: 'Inter', system-ui, sans-serif; }
+  #root { width: 100%; height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+<!-- Order matters — components.jsx first, then anything that uses it -->
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="browser-window.jsx"></script>
+<script type="text/babel" src="in-context.jsx"></script>
+<script type="text/babel" src="popup.jsx"></script>
+<script type="text/babel" src="settings.jsx"></script>
+<script type="text/babel" src="welcome.jsx"></script>
+<script type="text/babel" src="report-toasts.jsx"></script>
+<script type="text/babel" src="specimens.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  // Resolve which component to mount from the URL ?which= param.
+  // Set the body to the requested width/height so Playwright captures
+  // the exact intended artboard dimensions.
+  const params = new URLSearchParams(location.search);
+  const which = params.get('which') || 'marquee';
+
+  const stages = {
+    marquee: { node: () => <StoreMarquee/>,    w: 1400, h: 560 },
+    tile:    { node: () => <StoreSmallTile/>,  w: 440,  h: 280 },
+    icons:   { node: () => <IconSpecimen/>,    w: 880,  h: 680 },
+    'before-after': { node: () => (
+      <div style={{ padding: 24, background: 'var(--bg)', width: '100%', height: '100%' }}>
+        <BeforeAfter/>
+      </div>
+    ), w: 1280, h: 520 },
+    live: { node: () => <LiveDemo width={1200} height={760}/>, w: 1280, h: 800 },
+    'live-popup': { node: () => (
+      <div style={{ width: '100%', height: '100%', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+        <BrowserWithKrumb url="thedailyledger.com" iconState="just-acted" popupOpen popupNode={<PopupRejected site="thedailyledger.com"/>} width={1100} height={680}>
+          <FakeNewsPage/>
+        </BrowserWithKrumb>
+      </div>
+    ), w: 1280, h: 800 },
+    popup: { node: () => (
+      <div style={{ width: '100%', height: '100%', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative', gap: 32 }}>
+        <div className="k-grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.4, WebkitMaskImage: 'radial-gradient(closest-side, black 30%, transparent 80%)', maskImage: 'radial-gradient(closest-side, black 30%, transparent 80%)' }}/>
+        <div style={{ position: 'relative', filter: 'drop-shadow(0 24px 60px rgba(0,0,0,0.55))' }}><PopupRejected site="nytimes.com"/></div>
+        <div style={{ position: 'relative', filter: 'drop-shadow(0 24px 60px rgba(0,0,0,0.55))' }}><PopupFailed site="forum.lemonde.fr"/></div>
+        <div style={{ position: 'relative', filter: 'drop-shadow(0 24px 60px rgba(0,0,0,0.55))' }}><PopupPaused/></div>
+        <div style={{ position: 'absolute', left: 32, bottom: 24, fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text-dim)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          Five popup states · one job: tell you what just happened
+        </div>
+      </div>
+    ), w: 1280, h: 800 },
+    welcome:  { node: () => <WelcomePage/>,  w: 1280, h: 1280 },
+    settings: { node: () => <SettingsPage/>, w: 1080, h: 1640 },
+  };
+
+  const stage = stages[which] || stages.marquee;
+  document.body.style.width  = stage.w + 'px';
+  document.body.style.height = stage.h + 'px';
+  document.getElementById('root').style.width = stage.w + 'px';
+  document.getElementById('root').style.height = stage.h + 'px';
+
+  ReactDOM.createRoot(document.getElementById('root')).render(stage.node());
+</script>
+</body>
+</html>

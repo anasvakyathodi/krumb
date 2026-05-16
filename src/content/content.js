@@ -158,16 +158,16 @@
   // contain at least one of these somewhere in its text or attributes, in
   // any of the supported languages. Anything else is treated as a false
   // positive (e.g. a "Decline review" button on a GitHub PR page).
-  const BANNER_KEYWORDS_RE = /\b(cookie|cookies|consent|consents|consentement|privacy|privacidad|privacidade|privatsphare|gdpr|ccpa|tracking|trackers?|datenschutz|confidentialite|kuki|кук|쿠키|クッキー|cookie 政策|个人信息|个性化|偏好|prywatnosci|tietosuoja|integritet|biscoito|biscotti|cookie-erklarung|cookieinstellungen|cookie-einstellungen|cookie banner|cookie notice|cookie preferences|consent banner|consent management)\b/i;
+  const BANNER_KEYWORDS_RE = /(\bcookie\b|\bcookies\b|consent|consentement|privacy|privacidad|privacidade|privatsphare|gdpr|ccpa|tracking|trackers?|datenschutz|confidentialite|prywatnosci|tietosuoja|integritet|biscoito|biscotti|kuki|кук|쿠키|クッキー|个人信息|个性化|prefer(ences?|encias?)|cookie-?(bar|banner|notice|warning|consent|preferences?|wall|policy|popup|alert|message)|consent[- ]?(banner|management|notice|popup)|we value your privacy|site uses|tracking technologies|personalize content|partner(s|ed)? with)/i;
 
   function ancestorIsBannerLike(el) {
-    // Walk up the tree and check for: (a) a fixed/sticky-positioned ancestor
-    // (banners are almost always overlay-positioned), AND (b) banner-keyword
-    // text somewhere in that ancestor's subtree or attributes. If both,
-    // we're confident the button is inside a banner.
+    // Walk up the tree and find the first fixed/sticky-positioned ancestor.
+    // That ancestor must then look like a banner — by keyword text or
+    // attributes, or by being a small/edge-anchored container with the
+    // page's body containing cookie-keyword content.
     let node = el;
     let posAncestor = null;
-    for (let i = 0; i < 12 && node && node !== document.body; i++) {
+    for (let i = 0; i < 14 && node && node !== document.body; i++) {
       try {
         const cs = getComputedStyle(node);
         if (cs.position === 'fixed' || cs.position === 'sticky') {
@@ -179,32 +179,65 @@
     }
     if (!posAncestor) return false;
 
-    // Check text content + key attributes of the fixed/sticky ancestor.
+    // (a) Direct text content of the ancestor mentions cookies/consent.
     const text = (posAncestor.textContent || '').slice(0, 4000);
     if (BANNER_KEYWORDS_RE.test(text)) return true;
+
+    // (b) Class/id/aria/role/data-testid on the ancestor mentions it.
     const attrs = [
-      posAncestor.id, posAncestor.className,
+      posAncestor.id, posAncestor.className?.toString?.() || '',
       posAncestor.getAttribute?.('aria-label'),
+      posAncestor.getAttribute?.('aria-labelledby'),
       posAncestor.getAttribute?.('role'),
       posAncestor.getAttribute?.('data-testid'),
+      posAncestor.getAttribute?.('data-cy'),
+      posAncestor.getAttribute?.('data-component'),
     ].filter(Boolean).join(' ');
     if (BANNER_KEYWORDS_RE.test(attrs)) return true;
 
-    // Dialog role is also a strong signal (CMP modals often have role=dialog).
+    // (c) Dialog/region role on a small container near a viewport edge AND
+    // the page body mentions cookies — typical of overlay-style banners.
     const role = posAncestor.getAttribute?.('role');
-    if (role === 'dialog' || role === 'alertdialog') {
-      // Even in a dialog, require some keyword evidence elsewhere on page.
-      const bodySnippet = (document.body?.textContent || '').slice(0, 8000);
-      if (BANNER_KEYWORDS_RE.test(bodySnippet)) return true;
+    const rect = posAncestor.getBoundingClientRect();
+    const vw = window.innerWidth || 1280;
+    const vh = window.innerHeight || 720;
+    const nearEdge = rect.bottom > vh - 20 || rect.top < 80 ||
+                     rect.right > vw - 20 || rect.left < 20;
+    const banner_size = rect.width < vw * 0.9 && rect.height < vh * 0.9;
+    if ((role === 'dialog' || role === 'alertdialog' || role === 'region' || role === 'complementary')
+        && banner_size && nearEdge) {
+      const body = (document.body?.textContent || '').slice(0, 12000);
+      if (BANNER_KEYWORDS_RE.test(body)) return true;
+    }
+
+    // (d) Any small fixed-positioned container that's edge-anchored AND the
+    // body mentions cookies. Conservative but catches sites whose banner
+    // markup lacks any obvious cookie-y attributes. (Restricted to small
+    // overlays so it can't fire on whole-viewport modals like newsletter
+    // sign-ups that happen to be near an edge.)
+    if (banner_size && nearEdge && (rect.width < 700 || rect.height < 300)) {
+      const body = (document.body?.textContent || '').slice(0, 12000);
+      if (BANNER_KEYWORDS_RE.test(body)) {
+        // Extra guard: the candidate container itself shouldn't look like
+        // a permanent chrome element (e.g. sticky header/nav with site
+        // logo). If it has nav/header role, skip.
+        const ariaRole = posAncestor.getAttribute?.('role');
+        if (ariaRole === 'navigation' || ariaRole === 'banner') return false;
+        if (posAncestor.tagName === 'NAV' || posAncestor.tagName === 'HEADER') return false;
+        return true;
+      }
     }
     return false;
   }
 
-  // The heuristic is only safe in the first few seconds after the page
-  // starts loading. After that, the user is interacting with the actual
-  // app and ambient "reject"/"decline" buttons (PR review, calendar
-  // invites, etc.) become the more common kind.
-  const HEURISTIC_WINDOW_MS = 8000;
+  // The heuristic only fires in the first 30 seconds after the content
+  // script starts. Banners typically appear within 5 s; 30 s leaves
+  // plenty of headroom for sluggish CMPs while still ruling out
+  // app-state buttons that load much later (e.g. a "Decline meeting"
+  // button that only appears after the user opens a calendar event).
+  // The banner-container gate in ancestorIsBannerLike is the real
+  // safety belt; the time window is belt-and-braces.
+  const HEURISTIC_WINDOW_MS = 30000;
 
   // Last-resort heuristic for "single-action" cookie banners (e.g. Samsung,
   // many APAC sites) that only offer "Accept" + a close × icon. We look for

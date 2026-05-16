@@ -240,16 +240,28 @@ function renderState(state, ctx) {
 // ─────────────────────────── Boot ───────────────────────────
 async function consumePickerResult() {
   try {
-    const raw = await chrome.storage.session.get('picker:last');
-    const data = raw['picker:last'];
-    if (!data) return null;
-    // Drop stale picks (>5 min old).
-    if (Date.now() - (data.at || 0) > 5 * 60 * 1000) {
-      await chrome.storage.session.remove('picker:last');
+    const raw = await chrome.storage.session.get(['picker:last', 'report:draft']);
+    const pick = raw['picker:last'];
+    const draft = raw['report:draft'];
+    if (!pick) {
+      // No new pick — but if there's a stale draft sitting around, clear
+      // it so we don't surprise the user on a future popup open.
+      if (draft) await chrome.storage.session.remove('report:draft');
       return null;
     }
-    await chrome.storage.session.remove('picker:last');
-    return data;
+    if (Date.now() - (pick.at || 0) > 5 * 60 * 1000) {
+      await chrome.storage.session.remove(['picker:last', 'report:draft']);
+      return null;
+    }
+    await chrome.storage.session.remove(['picker:last', 'report:draft']);
+    return {
+      selector: pick.selector,
+      label: pick.label,
+      notes: draft?.notes || '',
+      // Prefer the pick's selector, but if the user had also typed one
+      // manually we keep that as a fallback for the input.
+      manualSelector: draft?.selector || '',
+    };
   } catch { return null; }
 }
 

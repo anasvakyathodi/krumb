@@ -67,16 +67,20 @@ export function renderReport({ root, site, onCancel, prefill = null }) {
     </div>
   `;
 
-  // Pre-fill the selector when arriving here from the on-page picker, so
-  // the user lands back where they left off.
-  if (prefill?.selector) {
+  // Pre-fill when arriving here from the on-page picker. Restore the
+  // notes the user typed before clicking Highlight, then the selector
+  // (preferring the freshly-picked one over anything they had manually
+  // typed). If they typed nothing, leave a hint about the picked label.
+  if (prefill) {
     const sel = document.getElementById('report-selector');
-    if (sel) sel.value = prefill.selector;
-  }
-  if (prefill?.label) {
-    const notes = document.getElementById('report-notes');
-    if (notes && !notes.value) {
-      notes.value = `Reject button label on page: "${prefill.label}"`;
+    const notesEl = document.getElementById('report-notes');
+    if (sel) sel.value = prefill.selector || prefill.manualSelector || '';
+    if (notesEl) {
+      if (prefill.notes) {
+        notesEl.value = prefill.notes;
+      } else if (prefill.label) {
+        notesEl.value = `Reject button label on page: "${prefill.label}"`;
+      }
     }
   }
 
@@ -87,7 +91,16 @@ export function renderReport({ root, site, onCancel, prefill = null }) {
     if (action === 'cancel' || action === 'close') return close();
 
     if (action === 'highlight') {
-      // Ask the service worker to inject the picker into the active tab.
+      // Save the in-flight notes so the user doesn't lose what they
+      // typed during the picker round-trip. Read both fields back when
+      // the popup reopens with the picker result.
+      const notes = document.getElementById('report-notes')?.value || '';
+      const selector = document.getElementById('report-selector')?.value || '';
+      try {
+        await chrome.storage.session.set({
+          'report:draft': { notes, selector, site, at: Date.now() },
+        });
+      } catch {}
       await send(MSG.OPEN_PICKER, { site });
       window.close();
       return;

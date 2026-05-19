@@ -1,5 +1,7 @@
 # Krumb
 
+Download Extension [here](https://chromewebstore.google.com/detail/aipcolidojbgfjodidmloekakimgiild?utm_source=item-share-cb)
+
 > Auto-rejects cookie banners on every site you visit. Open-source. Zero tracking.
 
 Krumb is a Chrome Manifest V3 extension. It runs silently on every page, finds the "Reject all" / "Necessary only" button via a community-maintained selector list (with a multilingual heuristic fallback), and clicks it for you. The banner is gone in roughly 200ms — you typically never see it.
